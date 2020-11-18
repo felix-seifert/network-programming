@@ -2,13 +2,28 @@ package com.felixseifert.kth.networkprogramming.task3.model;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class Question {
 
     public static final String SQL_TABLE = "QUESTIONS";
 
-    public static final String[] SQL_COLUMNS = {"ID", "QUESTION", "ANSWER_A", "ANSWER_B", "ANSWER_C", "ANSWER_D",
-            "CORRECT_ANSWER"};
+    //public static final String[] SQL_COLUMNS = {"ID", "QUESTION", "ANSWER_A", "ANSWER_B", "ANSWER_C", "ANSWER_D",
+      //      "CORRECT_ANSWER"};
+
+    public static final Map<String, String> SQL_COLUMNS = new LinkedHashMap<>();
+
+    static {
+        SQL_COLUMNS.put("ID", "INT PRIMARY KEY AUTO_INCREMENT");
+        SQL_COLUMNS.put("QUESTION", "VARCHAR(255) NOT NULL");
+        SQL_COLUMNS.put("ANSWER_A", "VARCHAR(255) NOT NULL");
+        SQL_COLUMNS.put("ANSWER_B", "VARCHAR(255) NOT NULL");
+        SQL_COLUMNS.put("ANSWER_C", "VARCHAR(255) NOT NULL");
+        SQL_COLUMNS.put("ANSWER_D", "VARCHAR(255) NOT NULL");
+        SQL_COLUMNS.put("CORRECT_ANSWER", "INT NOT NULL");
+    }
 
     Integer id;
 
@@ -25,6 +40,16 @@ public class Question {
     CorrectAnswer correctAnswer;
 
     public Question() {
+    }
+
+    public Question(String question, String answerA, String answerB, String answerC, String answerD,
+                    CorrectAnswer correctAnswer) {
+        this.question = question;
+        this.answerA = answerA;
+        this.answerB = answerB;
+        this.answerC = answerC;
+        this.answerD = answerD;
+        this.correctAnswer = correctAnswer;
     }
 
     public Question(Integer id, String question, String answerA, String answerB, String answerC, String answerD,
@@ -103,5 +128,31 @@ public class Question {
 
     public void setCorrectAnswer(CorrectAnswer correctAnswer) {
         this.correctAnswer = correctAnswer;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Question question1 = (Question) o;
+        return Objects.equals(id, question1.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 11;
+    }
+
+    @Override
+    public String toString() {
+        return "Question{" +
+                "id=" + id +
+                ", question='" + question + '\'' +
+                ", answerA='" + answerA + '\'' +
+                ", answerB='" + answerB + '\'' +
+                ", answerC='" + answerC + '\'' +
+                ", answerD='" + answerD + '\'' +
+                ", correctAnswer=" + correctAnswer +
+                '}';
     }
 }

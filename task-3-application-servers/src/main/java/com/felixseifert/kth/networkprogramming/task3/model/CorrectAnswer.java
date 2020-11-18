@@ -7,7 +7,7 @@ import java.util.Map;
 public enum CorrectAnswer {
     A(1), B(2), C(3), D(4);
 
-    Integer databaseCode;
+    private Integer databaseCode;
 
     private static final Map<Integer, CorrectAnswer> databaseKeyMap = new HashMap<>(values().length, 1);
 
@@ -25,5 +25,9 @@ public enum CorrectAnswer {
             throw new IllegalArgumentException("Invalid databaseCode for CorrectAnswer: " + databaseCode);
         }
         return correctAnswer;
+    }
+
+    public Integer getDatabaseCode() {
+        return databaseCode;
     }
 }

@@ -1,5 +1,6 @@
 package com.felixseifert.kth.networkprogramming.task3.repository;
 
+import com.felixseifert.kth.networkprogramming.task3.databaseconnection.DatabaseUtils;
 import com.felixseifert.kth.networkprogramming.task3.model.Question;
 
 import java.sql.Connection;
@@ -12,32 +13,74 @@ import java.util.Optional;
 
 public class QuestionRepository {
 
-    public List<Question> findAllQuestions(Connection connection) throws SQLException {
+    private static QuestionRepository questionRepositorySingleton;
 
-        PreparedStatement preparedStatement = RepositoryUtils
-                .createFindAllPreparedStatement(connection, Question.SQL_TABLE, Question.SQL_COLUMNS);
+    private QuestionRepository() {}
 
-        ResultSet resultSet = preparedStatement.executeQuery();
+    public static QuestionRepository getInstance() {
+        if(questionRepositorySingleton == null) {
+            synchronized (QuestionRepository.class) {
+                if(questionRepositorySingleton == null) {
+                    questionRepositorySingleton = new QuestionRepository();
+                }
+            }
+        }
+        return questionRepositorySingleton;
+    }
 
-        List<Question> questions = new ArrayList<>();
+    public List<Question> findAllQuestions() {
 
-        while(resultSet.next()) {
-            questions.add(Question.createOutOfResultSet(resultSet));
+        List<Question> questions = null;
+
+        try (Connection connection = DatabaseUtils.getConnection()) {
+
+            PreparedStatement preparedStatement = RepositoryUtils
+                    .createFindAllPreparedStatement(connection, Question.SQL_TABLE, Question.SQL_COLUMNS);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            questions = new ArrayList<>();
+
+            while (resultSet.next()) {
+                questions.add(Question.createOutOfResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            DatabaseUtils.printSQLException(e);
         }
 
         return questions;
     }
 
-    public Optional<Question> findById(Connection connection, Integer id) throws SQLException {
+    public Optional<Question> findById(Integer id) {
 
-        PreparedStatement preparedStatement = RepositoryUtils
-                .createFindByIdPreparedStatement(connection, Question.SQL_TABLE, Question.SQL_COLUMNS, id);
+        try(Connection connection = DatabaseUtils.getConnection()) {
 
-        ResultSet resultSet = preparedStatement.executeQuery();
+            PreparedStatement preparedStatement = RepositoryUtils
+                    .createFindByIdPreparedStatement(connection, Question.SQL_TABLE, Question.SQL_COLUMNS, id);
 
-        if(resultSet.next()) {
-            return Optional.of(Question.createOutOfResultSet(resultSet));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return Optional.of(Question.createOutOfResultSet(resultSet));
+            }
+        }
+        catch(SQLException e) {
+            DatabaseUtils.printSQLException(e);
         }
         return Optional.empty();
+    }
+
+    public void create(Question question) {
+
+        try(Connection connection = DatabaseUtils.getConnection()) {
+
+            PreparedStatement preparedStatement = RepositoryUtils
+                    .createCreatePreparedStatement(connection, Question.SQL_TABLE, Question.SQL_COLUMNS, question);
+
+            preparedStatement.executeUpdate();
+        }
+        catch(SQLException e) {
+            DatabaseUtils.printSQLException(e);
+        }
     }
 }
