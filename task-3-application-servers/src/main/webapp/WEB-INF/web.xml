@@ -13,4 +13,10 @@
         <servlet-name>GameServerServlet</servlet-name>
         <url-pattern>/game</url-pattern>
     </servlet-mapping>
+
+    <listener>
+        <listener-class>
+            com.felixseifert.kth.networkprogramming.task3.databaseconnection.DatabaseSetup
+        </listener-class>
+    </listener>
 </web-app>
