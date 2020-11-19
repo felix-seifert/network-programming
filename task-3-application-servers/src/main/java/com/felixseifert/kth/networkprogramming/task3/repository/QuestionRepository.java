@@ -68,7 +68,7 @@ public class QuestionRepository {
         return Optional.empty();
     }
 
-    public void create(Question question) {
+    public Question create(Question question) {
 
         try(Connection connection = DatabaseUtils.getConnection()) {
 
@@ -76,13 +76,17 @@ public class QuestionRepository {
                     connection, Question.SQL_TABLE, Question.SQL_COLUMNS, question);
 
             preparedStatement.executeUpdate();
+
+            return question;
         }
         catch(SQLException e) {
             DatabaseUtils.printSQLException(e);
         }
+
+        return null;
     }
 
-    public void update(Question question) {
+    public Question update(Question question) {
 
         try(Connection connection = DatabaseUtils.getConnection()) {
 
@@ -90,10 +94,14 @@ public class QuestionRepository {
                     connection, Question.SQL_TABLE, Question.SQL_COLUMNS, question, question.getId());
 
             preparedStatement.executeUpdate();
+
+            return question;
         }
         catch(SQLException e) {
             DatabaseUtils.printSQLException(e);
         }
+
+        return null;
     }
 
     public void delete(Question question) {
