@@ -30,16 +30,14 @@ public class QuestionRepository {
 
     public List<Question> findAllQuestions() {
 
-        List<Question> questions = null;
+        List<Question> questions = new ArrayList<>();
 
         try (Connection connection = DatabaseUtils.getConnection()) {
 
-            PreparedStatement preparedStatement = RepositoryUtils
-                    .createFindAllPreparedStatement(connection, Question.SQL_TABLE, Question.SQL_COLUMNS);
+            PreparedStatement preparedStatement = RepositoryUtils.createFindAllPreparedStatement(
+                    connection, Question.SQL_TABLE, Question.SQL_COLUMNS);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-
-            questions = new ArrayList<>();
 
             while (resultSet.next()) {
                 questions.add(Question.createOutOfResultSet(resultSet));
@@ -51,12 +49,12 @@ public class QuestionRepository {
         return questions;
     }
 
-    public Optional<Question> findById(Integer id) {
+    public Optional<Question> findById(int id) {
 
         try(Connection connection = DatabaseUtils.getConnection()) {
 
-            PreparedStatement preparedStatement = RepositoryUtils
-                    .createFindByIdPreparedStatement(connection, Question.SQL_TABLE, Question.SQL_COLUMNS, id);
+            PreparedStatement preparedStatement = RepositoryUtils.createFindByIdPreparedStatement(
+                    connection, Question.SQL_TABLE, Question.SQL_COLUMNS, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -74,8 +72,40 @@ public class QuestionRepository {
 
         try(Connection connection = DatabaseUtils.getConnection()) {
 
-            PreparedStatement preparedStatement = RepositoryUtils
-                    .createCreatePreparedStatement(connection, Question.SQL_TABLE, Question.SQL_COLUMNS, question);
+            PreparedStatement preparedStatement = RepositoryUtils.createCreatePreparedStatement(
+                    connection, Question.SQL_TABLE, Question.SQL_COLUMNS, question);
+
+            preparedStatement.executeUpdate();
+        }
+        catch(SQLException e) {
+            DatabaseUtils.printSQLException(e);
+        }
+    }
+
+    public void update(Question question) {
+
+        try(Connection connection = DatabaseUtils.getConnection()) {
+
+            PreparedStatement preparedStatement = RepositoryUtils.createUpdatePreparedStatement(
+                    connection, Question.SQL_TABLE, Question.SQL_COLUMNS, question, question.getId());
+
+            preparedStatement.executeUpdate();
+        }
+        catch(SQLException e) {
+            DatabaseUtils.printSQLException(e);
+        }
+    }
+
+    public void delete(Question question) {
+        deleteById(question.getId());
+    }
+
+    public void deleteById(int id) {
+
+        try(Connection connection = DatabaseUtils.getConnection()) {
+
+            PreparedStatement preparedStatement = RepositoryUtils.createDeletePreparedStatement(
+                    connection, Question.SQL_TABLE, id);
 
             preparedStatement.executeUpdate();
         }

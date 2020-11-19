@@ -13,6 +13,9 @@ public class RepositoryUtils {
 
     private static final String abbr = "e";
 
+    // Todo: Make name of primary key also variable
+    private static final String id = "ID";
+
     static PreparedStatement createFindAllPreparedStatement(Connection connection, String sqlTable,
                                                             Map<String, String> sqlColumns) throws SQLException {
 
@@ -20,89 +23,116 @@ public class RepositoryUtils {
     }
 
     static PreparedStatement createFindByIdPreparedStatement(Connection connection, String sqlTable,
-                                                             Map<String, String> sqlColumns, Object id) throws SQLException {
+                                                             Map<String, String> sqlColumns, Object id)
+            throws SQLException {
 
         PreparedStatement preparedStatement = connection.prepareStatement(
                 createFindByIdString(sqlTable, new ArrayList<>(sqlColumns.keySet())));
 
-        if(id instanceof Integer) {
-            preparedStatement.setInt(1, (Integer) id);
-        }
-        else if(id instanceof Long) {
-            preparedStatement.setLong(1, (Long) id);
-        }
-        else if(id instanceof String) {
-            preparedStatement.setString(1, (String) id);
-        }
-
-        return preparedStatement;
+        return insertObjectAtPositionI(preparedStatement, id, 1);
     }
 
     static PreparedStatement createCreatePreparedStatement(Connection connection, String sqlTable,
-            Map<String, String> sqlColumns, Object objectToSave) throws SQLException {
+                                                           Map<String, String> sqlColumns, Object objectToSave)
+            throws SQLException {
 
         PreparedStatement preparedStatement = connection.prepareStatement(
                 createCreateString(sqlTable, new ArrayList<>(sqlColumns.keySet())));
 
-        try {
-            int i = 0;
-            for (String column : sqlColumns.keySet()) {
+        return insertAllValuesExceptId(preparedStatement, sqlColumns.keySet(), objectToSave);
+    }
 
-                // Implementation assumes that value ID is implemented as
-                // AUTO_INCREMENT and does NOT have to be inserted
-                if(column.equals("ID")) {
-                    continue;
-                }
+    static PreparedStatement createUpdatePreparedStatement(Connection connection, String sqlTable,
+                                                           Map<String, String> sqlColumns, Object objectToSave,
+                                                           Object id) throws SQLException {
 
-                i++;
+        PreparedStatement preparedStatement = connection.prepareStatement(
+                createUpdateSting(sqlTable, new ArrayList<>(sqlColumns.keySet())));
 
-                // Parse and execute get method for each sql column
-                String methodName = "get" + Arrays.stream(column.split("_"))
-                        .map(s -> s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase())
-                        .collect(Collectors.joining());
+        preparedStatement = insertAllValuesExceptId(preparedStatement, sqlColumns.keySet(), objectToSave);
 
-                Object value = objectToSave.getClass().getMethod(methodName).invoke(objectToSave);
+        return insertObjectAtPositionI(preparedStatement, id, sqlColumns.keySet().size());
+    }
 
-                preparedStatement = insertObjectAtPositionI(preparedStatement, value, i);
+    static PreparedStatement createDeletePreparedStatement(Connection connection, String sqlTable, Object id)
+            throws SQLException {
+
+        PreparedStatement preparedStatement = connection.prepareStatement(createDeleteString(sqlTable));
+
+        return insertObjectAtPositionI(preparedStatement, id, 1);
+    }
+
+    private static PreparedStatement insertAllValuesExceptId(PreparedStatement preparedStatement,
+                                                             Collection<String> sqlColumns, Object objectToSave)
+            throws SQLException {
+
+        int i = 0;
+        for (String column : sqlColumns) {
+
+            // Implementation assumes that value ID is implemented as
+            // AUTO_INCREMENT and does NOT have to be inserted
+            if(column.equals(id)) {
+                continue;
             }
-        }
-        catch(IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
+
+            i++;
+
+            Object value = getValueOfSQLColumn(objectToSave, column);
+
+            preparedStatement = insertObjectAtPositionI(preparedStatement, value, i);
         }
 
         return preparedStatement;
     }
 
     private static PreparedStatement insertObjectAtPositionI(PreparedStatement preparedStatement,
-                                                             Object object, int i) throws SQLException {
+                                                             Object value, int i) throws SQLException {
 
-        if(object instanceof String) {
-            preparedStatement.setString(i, ((String) object));
+        if(value instanceof String) {
+            preparedStatement.setString(i, ((String) value));
             return preparedStatement;
         }
-        if(object instanceof Integer) {
-            preparedStatement.setInt(i, ((Integer) object));
+        if(value instanceof Integer) {
+            preparedStatement.setInt(i, ((Integer) value));
             return preparedStatement;
         }
-        if(object instanceof Long) {
-            preparedStatement.setLong(i, ((Long) object));
+        if(value instanceof Long) {
+            preparedStatement.setLong(i, ((Long) value));
             return preparedStatement;
         }
         // Todo: Generalise conversation of enums (consider to use converter classes)
-        if(object instanceof CorrectAnswer) {
-            preparedStatement.setInt(i, ((CorrectAnswer) object).getDatabaseCode());
+        if(value instanceof CorrectAnswer) {
+            preparedStatement.setInt(i, ((CorrectAnswer) value).getDatabaseCode());
             return preparedStatement;
         }
 //        if(object instanceof Enum) {
 //            // ...
 //        }
-        preparedStatement.setObject(i, object);
+        preparedStatement.setObject(i, value);
         return preparedStatement;
     }
 
-    static String createFindAllString(String sqlTable, List<String> sqlColumns) {
+    private static Object getValueOfSQLColumn(Object originatingObject, String sqlColumn) {
+
+        // Parse and execute get method for given sql column
+        String methodName = "get" + Arrays.stream(sqlColumn.split("_"))
+                .map(s -> s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase())
+                .collect(Collectors.joining());
+
+        Object value = null;
+        try {
+            value = originatingObject.getClass().getMethod(methodName).invoke(originatingObject);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        return value;
+    }
+
+    private static String createFindAllString(String sqlTable, Collection<String> sqlColumns) {
 
         StringBuilder queryBuilder = new StringBuilder();
+
         queryBuilder.append("SELECT ");
 
         Iterator<String> iterator = sqlColumns.iterator();
@@ -113,36 +143,51 @@ public class RepositoryUtils {
             if(iterator.hasNext()) queryBuilder.append(", ");
         }
 
-        queryBuilder.append(" FROM ");
-        queryBuilder.append(sqlTable);
-        queryBuilder.append(" ");
-        queryBuilder.append(abbr);
+        queryBuilder.append(" FROM ").append(sqlTable).append(" ").append(abbr);
 
         return queryBuilder.toString();
     }
 
-    static String createFindByIdString(String sqlTable, List<String> sqlColumns) {
-        return createFindAllString(sqlTable, sqlColumns) + " WHERE " + abbr + ".ID=?";
+    private static String createFindByIdString(String sqlTable, Collection<String> sqlColumns) {
+        return createFindAllString(sqlTable, sqlColumns) + " WHERE " + abbr + "." + id + "=?";
     }
 
-    static String createCreateString(String sqlTable, List<String> sqlColumns) {
+    private static String createCreateString(String sqlTable, Collection<String> sqlColumns) {
 
         // Implementation assumes that value ID is implemented as
         // AUTO_INCREMENT and does NOT have to be inserted
-        StringBuilder queryBuilder = new StringBuilder();
-        queryBuilder.append("INSERT INTO ");
-        queryBuilder.append(sqlTable);
-        queryBuilder.append("(");
-        queryBuilder.append(sqlColumns.stream()
-                .filter(c -> !c.equals("ID"))
-                .collect(Collectors.joining(", ")));
-        queryBuilder.append(") VALUES (");
-        queryBuilder.append(sqlColumns.stream()
-                .filter(c -> !c.equals("ID"))
-                .map(c -> "?")
-                .collect(Collectors.joining(", ")));
-        queryBuilder.append(")");
+        return new StringBuilder()
+                .append("INSERT INTO ").append(sqlTable)
+                .append("(")
+                .append(sqlColumns.stream()
+                        .filter(c -> !c.equals(id))
+                        .collect(Collectors.joining(", ")))
+                .append(") VALUES (")
+                .append(sqlColumns.stream()
+                        .filter(c -> !c.equals(id))
+                        .map(c -> "?")
+                        .collect(Collectors.joining(", ")))
+                .append(")").toString();
+    }
 
-        return queryBuilder.toString();
+    private static String createUpdateSting(String sqlTable, Collection<String> sqlColumns) {
+
+        return new StringBuilder()
+                .append("UPDATE ").append(sqlTable)
+                .append(" SET ")
+                .append(sqlColumns.stream()
+                        .filter(c -> !c.equals(id))
+                        .map(c -> c + "=?")
+                        .collect(Collectors.joining(", ")))
+                .append(" WHERE " + id + "=?")
+                .toString();
+    }
+
+    private static String createDeleteString(String sqlTable) {
+
+        return new StringBuilder()
+                .append("DELETE FROM ").append(sqlTable)
+                .append(" WHERE ").append(id).append("=?")
+                .toString();
     }
 }
