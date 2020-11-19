@@ -10,9 +10,6 @@ public class Question {
 
     public static final String SQL_TABLE = "QUESTIONS";
 
-    //public static final String[] SQL_COLUMNS = {"ID", "QUESTION", "ANSWER_A", "ANSWER_B", "ANSWER_C", "ANSWER_D",
-      //      "CORRECT_ANSWER"};
-
     public static final Map<String, String> SQL_COLUMNS = new LinkedHashMap<>();
 
     static {
