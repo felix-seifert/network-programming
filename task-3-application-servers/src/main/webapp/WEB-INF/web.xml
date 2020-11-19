@@ -8,9 +8,14 @@
         <servlet-name>GameServerServlet</servlet-name>
         <servlet-class>com.felixseifert.kth.networkprogramming.task3.controller.GameServerServlet</servlet-class>
     </servlet>
-    
     <servlet-mapping>
         <servlet-name>GameServerServlet</servlet-name>
         <url-pattern>/game</url-pattern>
     </servlet-mapping>
+
+    <listener>
+        <listener-class>
+            com.felixseifert.kth.networkprogramming.task3.databaseconnection.DatabaseSetup
+        </listener-class>
+    </listener>
 </web-app>
