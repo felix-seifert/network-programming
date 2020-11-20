@@ -7,9 +7,9 @@ import java.sql.SQLException;
 public class H2JDBCUtils {
 
     static Connection getConnection() {
-        String jdbcURL = "jdbc:h2:~/test";
-        String jdbcUsername = "sa";
-        String jdbcPassword = "";
+        String jdbcURL = "jdbc:postgresql://localhost:5432/quiz_db";
+        String jdbcUsername = "postgres";
+        String jdbcPassword = "torquerf1";
 
         return getConnection(jdbcURL, jdbcUsername, jdbcPassword);
     }

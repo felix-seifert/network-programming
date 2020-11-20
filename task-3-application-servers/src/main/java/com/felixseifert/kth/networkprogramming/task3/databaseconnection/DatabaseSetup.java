@@ -1,6 +1,7 @@
 package com.felixseifert.kth.networkprogramming.task3.databaseconnection;
 
 import com.felixseifert.kth.networkprogramming.task3.model.Question;
+import com.felixseifert.kth.networkprogramming.task3.model.User;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -15,7 +16,7 @@ public class DatabaseSetup implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
 
         try {
-            Class.forName("org.h2.Driver");
+            Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -35,6 +36,7 @@ public class DatabaseSetup implements ServletContextListener {
         } catch (SQLException e) {
             DatabaseUtils.printSQLException(e);
         }
+        this.setupUserTable();
     }
 
     @Override
@@ -46,6 +48,38 @@ public class DatabaseSetup implements ServletContextListener {
 
         try(Connection connection = DatabaseUtils.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(questionTableDropQuery.toString());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            DatabaseUtils.printSQLException(e);
+        }
+        this.destroyUserTable();
+    }
+
+    public void setupUserTable(){
+        StringBuilder userTableCreateQuery = new StringBuilder();
+        userTableCreateQuery.append("CREATE TABLE ");
+        userTableCreateQuery.append(User.SQL_TABLE);
+        userTableCreateQuery.append("(");
+        userTableCreateQuery.append(User.SQL_COLUMNS.entrySet().stream()
+                .map(c -> c.getKey() + " " + c.getValue())
+                .collect(Collectors.joining(", ")));
+        userTableCreateQuery.append(");");
+
+        try(Connection connection = DatabaseUtils.getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(userTableCreateQuery.toString());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            DatabaseUtils.printSQLException(e);
+        }
+    }
+
+    public void destroyUserTable(){
+        StringBuilder userTableDropQuery = new StringBuilder();
+        userTableDropQuery.append("DROP TABLE ");
+        userTableDropQuery.append(User.SQL_TABLE);
+
+        try(Connection connection = DatabaseUtils.getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(userTableDropQuery.toString());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             DatabaseUtils.printSQLException(e);
