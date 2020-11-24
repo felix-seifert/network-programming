@@ -14,44 +14,19 @@ import java.sql.SQLException;
 @WebServlet(value = "/login")
 public class LoginServlet extends HttpServlet {
 
-    private final UserRepository userRepository = new UserRepository();
-
+    private final UserRepository userRepository =UserRepository.getInstance();
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String username = request.getParameter("username");
-        String email = request.getParameter("email");
         String password = request.getParameter("password");
-
         try {
-            if(userRepository.validateCredentials(username, password, email)){
+            if(userRepository.validateCredentials(username, password)){
                 HttpSession session= request.getSession();
                 session.setAttribute("username", username);
-                response.sendRedirect("quiz.jsp");
+                response.sendRedirect(request.getContextPath()+"/quiz");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
-//    private void listUser(HttpServletRequest request, HttpServletResponse response)
-//            throws SQLException, IOException, ServletException {
-//        LoginDao loginDao = new LoginDao();
-//        List<User> listUser = loginDao.getAllUser();
-//        request.setAttribute("listUser", listUser);
-//        RequestDispatcher dispatcher = request.getRequestDispatcher("user-list.jsp");
-//        dispatcher.forward(request, response);
-//    }
-
-//    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-//            throws ServletException, IOException {
-//        String action = request.getServletPath();
-//
-//        try {
-//            listUser(request, response);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
-
 }

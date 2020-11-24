@@ -9,28 +9,38 @@ import java.sql.SQLException;
 
 public class UserRepository {
 
-    Connection connection = DatabaseUtils.getConnection();
-    String sql = "select * from public.users where username = ? and password = ? and email = ?";
-    String createUserSql= "insert into public.users (username, password, email) values (?,?,?)";
+    private static UserRepository userRepositorySingleton;
 
-    public Boolean validateCredentials(String username, String password, String email) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        preparedStatement.setString(1, username);
-        preparedStatement.setString(2, password);
-        preparedStatement.setString(3, email);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        if(resultSet.next()){
-            return  true;
+    private UserRepository() {}
+
+    public static UserRepository getInstance() {
+        if(userRepositorySingleton == null) {
+            synchronized (UserRepository.class) {
+                if(userRepositorySingleton == null) {
+                    userRepositorySingleton = new UserRepository();
+                }
+            }
         }
-        return  false;
-
+        return userRepositorySingleton;
     }
 
-    public void createUser(String username, String password, String email ) throws SQLException {
+
+    Connection connection = DatabaseUtils.getConnection();
+    String validateSql = "select * from public.users where username = ? and password = ? and email = ?";
+    String createUserSql= "insert into public.users (username, password, email) values (?,?,?)";
+
+    public Boolean validateCredentials(String username, String password) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(validateSql);
+        preparedStatement.setString(1, username);
+        preparedStatement.setString(2, password);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        return resultSet.next() ? true : false;
+    }
+
+    public void createUser(String username, String password) throws SQLException {
         PreparedStatement preparedStatement = connection.prepareStatement(createUserSql);
         preparedStatement.setString(1, username);
         preparedStatement.setString(2, password);
-        preparedStatement.setString(3, email);
         preparedStatement.executeUpdate();
     }
 }
