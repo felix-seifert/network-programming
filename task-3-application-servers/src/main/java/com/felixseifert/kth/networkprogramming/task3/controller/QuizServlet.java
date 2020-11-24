@@ -37,9 +37,11 @@ public class QuizServlet extends HttpServlet {
         Boolean isCorrect = answer.equals(chosenOptions);
 
         if(isCorrect){
-            response.getOutputStream().print("<h1 style=\"color:green;text-align:center;\">Correct</h1>");
+            response.getOutputStream().print("<h1 style=\"color:green;text-align:center;\">Correct</h1>" +
+                    "<button type=\"button\" name=\"Back to Quiz\" onclick=\"history.back()\">back</button>");
         }else {
-            response.getOutputStream().print("<h1 style=\"color:red;text-align:center;\">Incorrect</h1>");
+            response.getOutputStream().print("<h1 style=\"color:red;text-align:center;\">Incorrect</h1>" +
+                    "<button type=\"button\" name=\"Back to Quiz\" onclick=\"history.back()\">back</button>");
         }
 
 
