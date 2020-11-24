@@ -8,7 +8,7 @@
     <title>Student List</title>
 </head>
 <body>
-<h1>Displaying Student List</h1>
+<h1>Quiz</h1>
 <table border="1" width="500" align="center">
     <tr bgcolor="00FF7F">
         <th><b>Question Id</b></th>
@@ -22,16 +22,18 @@
     %>
     <tr>
         <td><%=s.getId()%>
+
         </td>
         <td><%=s.getQuestion()%>
         </td>
         <td>
-            <form action="<%=request.getContextPath()%>/login" method="post">
+            <form action="<%=request.getContextPath()%>/quiz" method="post">
+                <input type="hidden" name="id" value="<%=s.getId()%>"/>
                 <%
-                    String[] answers = s.getAnswer().split(",");
+                    String[] answers = s.getOption().split(",");
                     for (String s1 : answers) {
                 %>
-                <input type="checkbox" name="id" value=${s1}><%=s1%><BR>
+                <input type="checkbox" name="option" value="<%=s1%>"><%=s1%><BR>
                 <%}%>
                 <input type="submit" value="Submit">
             </form>

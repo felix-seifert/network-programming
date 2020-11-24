@@ -16,21 +16,25 @@ public class Question {
         SQL_COLUMNS.put("ID", "INT PRIMARY KEY ");
         SQL_COLUMNS.put("QUESTION", "VARCHAR(255) NOT NULL");
         SQL_COLUMNS.put("ANSWER", "VARCHAR(255) NOT NULL");
+        SQL_COLUMNS.put("OPTION", "VARCHAR(255) NOT NULL");
     }
 
     Integer id;
 
     String question;
 
+    String option;
+
     String answer;
 
     public Question() {
     }
 
-    public Question(Integer id, String question, String answer) {
+    public Question(Integer id, String question, String answer, String option) {
         this.id = id;
         this.question = question;
         this.answer = answer;
+        this.option= option;
 
     }
 
@@ -38,7 +42,8 @@ public class Question {
         Integer id = resultSet.getInt("ID");
         String question = resultSet.getString("QUESTION");
         String answer = resultSet.getString("ANSWER");
-        return new Question(id, question, answer);
+        String option = resultSet.getString("OPTION");
+        return new Question(id, question, answer,option);
     }
 
     public Integer getId() {
@@ -57,7 +62,13 @@ public class Question {
         this.question = question;
     }
 
+    public String getOption() {
+        return option;
+    }
 
+    public void setOption(String option) {
+        this.option = option;
+    }
 
     @Override
     public boolean equals(Object o) {
