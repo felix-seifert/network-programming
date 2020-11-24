@@ -8,6 +8,7 @@ import javax.servlet.ServletContextListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DatabaseSetup implements ServletContextListener {
@@ -21,65 +22,41 @@ public class DatabaseSetup implements ServletContextListener {
             e.printStackTrace();
         }
 
-        StringBuilder questionTableCreateQuery = new StringBuilder();
-        questionTableCreateQuery.append("CREATE TABLE ");
-        questionTableCreateQuery.append(Question.SQL_TABLE);
-        questionTableCreateQuery.append("(");
-        questionTableCreateQuery.append(Question.SQL_COLUMNS.entrySet().stream()
-                .map(c -> c.getKey() + " " + c.getValue())
-                .collect(Collectors.joining(", ")));
-        questionTableCreateQuery.append(");");
-
-        try(Connection connection = DatabaseUtils.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(questionTableCreateQuery.toString());
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            DatabaseUtils.printSQLException(e);
-        }
-        this.setupUserTable();
+        this.createTable(Question.SQL_COLUMNS);
+        this.createTable(User.SQL_COLUMNS);
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-
-        StringBuilder questionTableDropQuery = new StringBuilder();
-        questionTableDropQuery.append("DROP TABLE ");
-        questionTableDropQuery.append(Question.SQL_TABLE);
-
-        try(Connection connection = DatabaseUtils.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(questionTableDropQuery.toString());
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            DatabaseUtils.printSQLException(e);
-        }
-        this.destroyUserTable();
+        this.destroyTable(Question.SQL_TABLE);
+        this.destroyTable(User.SQL_TABLE);
     }
 
-    public void setupUserTable(){
-        StringBuilder userTableCreateQuery = new StringBuilder();
-        userTableCreateQuery.append("CREATE TABLE ");
-        userTableCreateQuery.append(User.SQL_TABLE);
-        userTableCreateQuery.append("(");
-        userTableCreateQuery.append(User.SQL_COLUMNS.entrySet().stream()
+    public void createTable( Map<String, String> sqlColumns){
+        StringBuilder tableCreateQuery = new StringBuilder();
+        tableCreateQuery.append("CREATE TABLE ");
+        tableCreateQuery.append(User.SQL_TABLE);
+        tableCreateQuery.append("(");
+        tableCreateQuery.append(sqlColumns.entrySet().stream()
                 .map(c -> c.getKey() + " " + c.getValue())
                 .collect(Collectors.joining(", ")));
-        userTableCreateQuery.append(");");
+        tableCreateQuery.append(");");
 
         try(Connection connection = DatabaseUtils.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(userTableCreateQuery.toString());
+            PreparedStatement preparedStatement = connection.prepareStatement(tableCreateQuery.toString());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             DatabaseUtils.printSQLException(e);
         }
     }
 
-    public void destroyUserTable(){
-        StringBuilder userTableDropQuery = new StringBuilder();
-        userTableDropQuery.append("DROP TABLE ");
-        userTableDropQuery.append(User.SQL_TABLE);
+    public void destroyTable(String tableName){
+        StringBuilder tableDropQuery = new StringBuilder();
+        tableDropQuery.append("DROP TABLE ");
+        tableDropQuery.append(tableName);
 
         try(Connection connection = DatabaseUtils.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(userTableDropQuery.toString());
+            PreparedStatement preparedStatement = connection.prepareStatement(tableDropQuery.toString());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             DatabaseUtils.printSQLException(e);
