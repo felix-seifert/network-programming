@@ -2,6 +2,7 @@ package com.felixseifert.kth.networkprogramming.task3.databaseconnection;
 
 import com.felixseifert.kth.networkprogramming.task3.model.Question;
 import com.felixseifert.kth.networkprogramming.task3.model.User;
+import com.felixseifert.kth.networkprogramming.task3.repository.UserRepository;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -13,6 +14,8 @@ import java.util.stream.Collectors;
 
 public class DatabaseSetup implements ServletContextListener {
 
+    private final UserRepository userRepository = UserRepository.getInstance();
+
     @Override
     public void contextInitialized(ServletContextEvent sce) {
 
@@ -22,8 +25,11 @@ public class DatabaseSetup implements ServletContextListener {
             e.printStackTrace();
         }
 
-        this.createTable(Question.SQL_COLUMNS);
-        this.createTable(User.SQL_COLUMNS);
+        this.createTable(Question.SQL_TABLE, Question.SQL_COLUMNS);
+        this.createTable(User.SQL_TABLE, User.SQL_COLUMNS);
+
+        User user = new User(null, "user", "password");
+        userRepository.createUser(user);
     }
 
     @Override
@@ -32,10 +38,10 @@ public class DatabaseSetup implements ServletContextListener {
         this.destroyTable(User.SQL_TABLE);
     }
 
-    public void createTable( Map<String, String> sqlColumns){
+    private void createTable(String sqlTable, Map<String, String> sqlColumns){
         StringBuilder tableCreateQuery = new StringBuilder();
         tableCreateQuery.append("CREATE TABLE ");
-        tableCreateQuery.append(User.SQL_TABLE);
+        tableCreateQuery.append(sqlTable);
         tableCreateQuery.append("(");
         tableCreateQuery.append(sqlColumns.entrySet().stream()
                 .map(c -> c.getKey() + " " + c.getValue())
@@ -50,7 +56,7 @@ public class DatabaseSetup implements ServletContextListener {
         }
     }
 
-    public void destroyTable(String tableName){
+    private void destroyTable(String tableName){
         StringBuilder tableDropQuery = new StringBuilder();
         tableDropQuery.append("DROP TABLE ");
         tableDropQuery.append(tableName);

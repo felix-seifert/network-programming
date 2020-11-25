@@ -4,15 +4,6 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
 
-    <servlet>
-        <servlet-name>GameServerServlet</servlet-name>
-        <servlet-class>com.felixseifert.kth.networkprogramming.task3.controller.GameServerServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>GameServerServlet</servlet-name>
-        <url-pattern>/game</url-pattern>
-    </servlet-mapping>
-
     <listener>
         <listener-class>
             com.felixseifert.kth.networkprogramming.task3.databaseconnection.DatabaseSetup

@@ -5,7 +5,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Student List</title>
+    <title>Questions</title>
 </head>
 <body>
 <h1>Quiz</h1>
@@ -16,8 +16,12 @@
         <th><b>Options</b></th>
     </tr>
     <%
-        ArrayList<Question> std =
-                (ArrayList<Question>) request.getAttribute("data");
+        ArrayList<Question> std = new ArrayList<>();
+        Object o = request.getAttribute("data");
+        if(o != null) {
+            std = (ArrayList<Question>) request.getAttribute("data");
+        }
+
         for (Question s : std) {
     %>
     <tr>
@@ -37,8 +41,6 @@
                 <%}%>
                 <input type="submit" value="Submit">
             </form>
-
-
         </td>
     </tr>
     <%}%>

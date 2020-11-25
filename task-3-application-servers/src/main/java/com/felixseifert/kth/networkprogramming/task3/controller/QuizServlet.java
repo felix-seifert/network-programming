@@ -19,43 +19,47 @@ import java.util.Objects;
 @WebServlet(name = "QuizServlet", value="/quiz")
 public class QuizServlet extends HttpServlet {
 
-    private final QuestionRepository questionRepository=QuestionRepository.getInstance();
+    private final QuestionRepository questionRepository = QuestionRepository.getInstance();
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session= request.getSession();
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+
         if(Objects.isNull(session.getAttribute("username"))){
             RequestDispatcher dispatcher =
-                    request.getRequestDispatcher("login.jsp");
+                    request.getRequestDispatcher(ViewPage.LOGIN.fileName);
             if (dispatcher != null) {
                 dispatcher.forward(request, response);
             }
-        }else{
-            List<Question> questions = questionRepository.findAllQuestions();
-            request.setAttribute("data", questions);
-            String quizViewPage = "quiz.jsp";
-                RequestDispatcher dispatcher =
-                        request.getRequestDispatcher(quizViewPage);
-            if (dispatcher != null) {
-                dispatcher.forward(request, response);
-            }
+            return;
         }
 
-
+        List<Question> questions = questionRepository.findAllQuestions();
+        request.setAttribute("data", questions);
+        RequestDispatcher dispatcher =
+                request.getRequestDispatcher(ViewPage.QUIZ.fileName);
+        if(dispatcher != null) {
+            dispatcher.forward(request, response);
+        }
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
         List<String> chosenOptions = Arrays.asList(request.getParameterValues("option"));
-        Question question = questionRepository.findById(Integer.parseInt(request.getParameter("id"))).get();
+        Question question = questionRepository.findById(Integer.parseInt(request.getParameter("id")))
+                .orElseThrow(RuntimeException::new);
         List<String> answer = Arrays.asList(question.getAnswer().split(","));
 
-        if(StringUtils.validatSublist(chosenOptions,answer)){
+        if(StringUtils.areListsEqual(chosenOptions, answer)){
             response.getOutputStream().print("<h1 style=\"color:green;text-align:center;\">Correct</h1>" +
                     "<button type=\"button\" name=\"Back to Quiz\" onclick=\"history.back()\">back</button>");
-        }else {
-            response.getOutputStream().print("<h1 style=\"color:red;text-align:center;\">Incorrect</h1>" +
-                    "<button type=\"button\" name=\"Back to Quiz\" onclick=\"history.back()\">back</button>");
+            return;
         }
-
-
+        response.getOutputStream().print("<h1 style=\"color:red;text-align:center;\">Incorrect</h1>" +
+                "<button type=\"button\" name=\"Back to Quiz\" onclick=\"history.back()\">back</button>");
     }
 }

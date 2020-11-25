@@ -1,11 +1,14 @@
 package com.felixseifert.kth.networkprogramming.task3.repository;
 
 import com.felixseifert.kth.networkprogramming.task3.databaseconnection.DatabaseUtils;
+import com.felixseifert.kth.networkprogramming.task3.model.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserRepository {
 
@@ -24,23 +27,53 @@ public class UserRepository {
         return userRepositorySingleton;
     }
 
+    public Boolean areCredentialsValid(String username, String password) {
 
-    Connection connection = DatabaseUtils.getConnection();
-    String validateSql = "select * from public.users where username = ? and password = ? and email = ?";
-    String createUserSql= "insert into public.users (username, password, email) values (?,?,?)";
+        String validateSql = "select * from public.users where username = ? and password = ?";
 
-    public Boolean validateCredentials(String username, String password) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(validateSql);
-        preparedStatement.setString(1, username);
-        preparedStatement.setString(2, password);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        return resultSet.next() ? true : false;
+        try(Connection connection = DatabaseUtils.getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(validateSql);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            DatabaseUtils.printSQLException(e);
+        }
+        return false;
     }
 
-    public void createUser(String username, String password) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(createUserSql);
-        preparedStatement.setString(1, username);
-        preparedStatement.setString(2, password);
-        preparedStatement.executeUpdate();
+    public List<User> findAllUsers() {
+
+        List<User> users = new ArrayList<>();
+
+        try (Connection connection = DatabaseUtils.getConnection()) {
+
+            PreparedStatement preparedStatement = RepositoryUtils.createFindAllPreparedStatement(
+                    connection, User.SQL_TABLE, User.SQL_COLUMNS);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                users.add(User.createOutOfResultSet(resultSet));
+            }
+        } catch (SQLException e) {
+            DatabaseUtils.printSQLException(e);
+        }
+
+        return users;
+    }
+
+    public void createUser(User user) {
+
+        try(Connection connection = DatabaseUtils.getConnection()) {
+
+            PreparedStatement preparedStatement = RepositoryUtils.createCreatePreparedStatement(
+                    connection, User.SQL_TABLE, User.SQL_COLUMNS, user);
+            preparedStatement.executeUpdate();
+
+        } catch(SQLException e) {
+            DatabaseUtils.printSQLException(e);
+        }
     }
 }

@@ -13,7 +13,7 @@ public class Question {
     public static final Map<String, String> SQL_COLUMNS = new LinkedHashMap<>();
 
     static {
-        SQL_COLUMNS.put("ID", "INT PRIMARY KEY ");
+        SQL_COLUMNS.put("ID", "IDENTITY NOT NULL PRIMARY KEY");
         SQL_COLUMNS.put("QUESTION", "VARCHAR(255) NOT NULL");
         SQL_COLUMNS.put("ANSWER", "VARCHAR(255) NOT NULL");
         SQL_COLUMNS.put("OPTION", "VARCHAR(255) NOT NULL");

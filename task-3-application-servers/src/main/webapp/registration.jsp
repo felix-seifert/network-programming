@@ -4,11 +4,11 @@
 <html>
 <head>
     <meta charset="ISO-8859-1">
-<%--    <title>Insert title here</title>--%>
+    <title>Register</title>
 </head>
 <body>
 <div align="center">
-    <h1> Register </h1>
+    <h1>Register</h1>
     <form action="<%=request.getContextPath()%>/register" method="post">
         <table style="with: 100%">
             <tr>

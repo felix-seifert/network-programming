@@ -74,7 +74,6 @@ public class QuestionRepository {
 
             PreparedStatement preparedStatement = RepositoryUtils.createCreatePreparedStatement(
                     connection, Question.SQL_TABLE, Question.SQL_COLUMNS, question);
-
             preparedStatement.executeUpdate();
 
             return question;
