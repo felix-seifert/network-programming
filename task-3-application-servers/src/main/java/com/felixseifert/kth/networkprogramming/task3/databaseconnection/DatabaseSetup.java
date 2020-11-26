@@ -1,7 +1,9 @@
 package com.felixseifert.kth.networkprogramming.task3.databaseconnection;
 
+import com.felixseifert.kth.networkprogramming.task3.model.CorrectAnswer;
 import com.felixseifert.kth.networkprogramming.task3.model.Question;
 import com.felixseifert.kth.networkprogramming.task3.model.User;
+import com.felixseifert.kth.networkprogramming.task3.repository.QuestionRepository;
 import com.felixseifert.kth.networkprogramming.task3.repository.UserRepository;
 
 import javax.servlet.ServletContextEvent;
@@ -16,6 +18,8 @@ public class DatabaseSetup implements ServletContextListener {
 
     private final UserRepository userRepository = UserRepository.getInstance();
 
+    private final QuestionRepository questionRepository = QuestionRepository.getInstance();
+
     @Override
     public void contextInitialized(ServletContextEvent sce) {
 
@@ -29,7 +33,16 @@ public class DatabaseSetup implements ServletContextListener {
         this.createTable(User.SQL_TABLE, User.SQL_COLUMNS);
 
         User user = new User(null, "user", "password");
-        userRepository.createUser(user);
+        userRepository.create(user);
+
+        Question question = new Question("How many feet does a centipede have?",
+                "100", "102", "120", "122",
+                CorrectAnswer.A, CorrectAnswer.B, CorrectAnswer.C, CorrectAnswer.D);
+        questionRepository.create(question);
+
+        question = new Question("How many chambers does the heart have?",
+                "1", "2", "4", "6", CorrectAnswer.B);
+        questionRepository.create(question);
     }
 
     @Override

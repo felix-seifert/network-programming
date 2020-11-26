@@ -101,8 +101,12 @@ public class RepositoryUtils {
             return preparedStatement;
         }
         // Todo: Generalise conversation of enums (consider to use converter classes)
-        if(value instanceof CorrectAnswer) {
-            preparedStatement.setInt(i, ((CorrectAnswer) value).getDatabaseCode());
+        // Todo: Generalise one-to-many relationships with collections
+        if(value instanceof Set<?> && ((Set) value).stream().findFirst().get() instanceof CorrectAnswer) {
+            String correctAnswers = ((Set<CorrectAnswer>) value).stream()
+                    .map(CorrectAnswer::getValue)
+                    .collect(Collectors.joining("<>"));
+            preparedStatement.setObject(i, correctAnswers);
             return preparedStatement;
         }
 //        if(object instanceof Enum) {

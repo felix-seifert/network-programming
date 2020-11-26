@@ -43,7 +43,7 @@ public class UserRepository {
         return false;
     }
 
-    public List<User> findAllUsers() {
+    public List<User> findAll() {
 
         List<User> users = new ArrayList<>();
 
@@ -64,7 +64,7 @@ public class UserRepository {
         return users;
     }
 
-    public void createUser(User user) {
+    public void create(User user) {
 
         try(Connection connection = DatabaseUtils.getConnection()) {
 

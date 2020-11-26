@@ -1,11 +1,16 @@
 package com.felixseifert.kth.networkprogramming.task3.controller;
 
 public enum ViewPage {
-    LOGIN("login.jsp"), QUIZ("quiz.jsp"), REGISTER("registration.jsp");
+    LOGIN("login.jsp", "/login"),
+    QUIZ("quiz.jsp", "/quiz"),
+    REGISTER("registration.jsp", "/register");
 
     String fileName;
 
-    ViewPage(String fileName) {
+    String relativeUrl;
+
+    ViewPage(String fileName, String relativeUrl) {
         this.fileName = fileName;
+        this.relativeUrl = relativeUrl;
     }
 }

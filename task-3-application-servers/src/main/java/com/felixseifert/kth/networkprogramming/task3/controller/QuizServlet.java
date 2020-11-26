@@ -1,6 +1,5 @@
 package com.felixseifert.kth.networkprogramming.task3.controller;
 
-import com.felixseifert.kth.networkprogramming.task3.controller.utils.StringUtils;
 import com.felixseifert.kth.networkprogramming.task3.model.Question;
 import com.felixseifert.kth.networkprogramming.task3.repository.QuestionRepository;
 
@@ -15,6 +14,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @WebServlet(name = "QuizServlet", value="/quiz")
 public class QuizServlet extends HttpServlet {
@@ -29,14 +29,14 @@ public class QuizServlet extends HttpServlet {
 
         if(Objects.isNull(session.getAttribute("username"))){
             RequestDispatcher dispatcher =
-                    request.getRequestDispatcher(ViewPage.LOGIN.fileName);
+                    request.getRequestDispatcher(ViewPage.LOGIN.relativeUrl);
             if (dispatcher != null) {
                 dispatcher.forward(request, response);
             }
             return;
         }
 
-        List<Question> questions = questionRepository.findAllQuestions();
+        List<Question> questions = questionRepository.findAll();
         request.setAttribute("data", questions);
         RequestDispatcher dispatcher =
                 request.getRequestDispatcher(ViewPage.QUIZ.fileName);
@@ -49,17 +49,22 @@ public class QuizServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        List<String> chosenOptions = Arrays.asList(request.getParameterValues("option"));
-        Question question = questionRepository.findById(Integer.parseInt(request.getParameter("id")))
-                .orElseThrow(RuntimeException::new);
-        List<String> answer = Arrays.asList(question.getAnswer().split(","));
+        String[] chosenAnswersString = request.getParameterValues("answers");
+        List<String> chosenAnswers = Arrays.asList(Optional.ofNullable(chosenAnswersString).orElse(new String[0]));
+        int id = Integer.parseInt(request.getParameter("id"));
 
-        if(StringUtils.areListsEqual(chosenOptions, answer)){
+        if(areAnswersCorrect(id, chosenAnswers)){
             response.getOutputStream().print("<h1 style=\"color:green;text-align:center;\">Correct</h1>" +
                     "<button type=\"button\" name=\"Back to Quiz\" onclick=\"history.back()\">back</button>");
             return;
         }
         response.getOutputStream().print("<h1 style=\"color:red;text-align:center;\">Incorrect</h1>" +
                 "<button type=\"button\" name=\"Back to Quiz\" onclick=\"history.back()\">back</button>");
+    }
+
+    private boolean areAnswersCorrect(int id, List<String> chosenAnswers) {
+        Question question = questionRepository.findById(id).orElseThrow(RuntimeException::new);
+        return question.getCorrectAnswersString().containsAll(chosenAnswers)
+                && (long) question.getCorrectAnswersString().size() == chosenAnswers.size();
     }
 }

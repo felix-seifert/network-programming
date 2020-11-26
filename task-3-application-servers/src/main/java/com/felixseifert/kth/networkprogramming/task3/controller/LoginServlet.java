@@ -23,7 +23,7 @@ public class LoginServlet extends HttpServlet {
         HttpSession session = request.getSession();
 
         if(!Objects.isNull(session.getAttribute("username"))) {
-            response.sendRedirect(ViewPage.QUIZ.fileName);
+            response.sendRedirect(request.getContextPath() + ViewPage.QUIZ.relativeUrl);
             return;
         }
 
@@ -40,7 +40,7 @@ public class LoginServlet extends HttpServlet {
         if(userRepository.areCredentialsValid(username, password)){
             HttpSession session= request.getSession();
             session.setAttribute("username", username);
-            response.sendRedirect(ViewPage.QUIZ.fileName);
+            response.sendRedirect(request.getContextPath() + ViewPage.QUIZ.relativeUrl);
             return;
         }
         response.sendRedirect(ViewPage.LOGIN.fileName);
