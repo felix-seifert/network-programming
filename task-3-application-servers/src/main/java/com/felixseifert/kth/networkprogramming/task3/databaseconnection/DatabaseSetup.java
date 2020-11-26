@@ -8,12 +8,14 @@ import com.felixseifert.kth.networkprogramming.task3.repository.UserRepository;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@WebListener
 public class DatabaseSetup implements ServletContextListener {
 
     private final UserRepository userRepository = UserRepository.getInstance();
