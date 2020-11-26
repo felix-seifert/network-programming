@@ -50,6 +50,16 @@ public class Question {
     }
 
     public Question(String question, String answerA, String answerB, String answerC, String answerD,
+                    Set<CorrectAnswer> correctAnswers) {
+        this.question = question;
+        this.answerA = answerA;
+        this.answerB = answerB;
+        this.answerC = answerC;
+        this.answerD = answerD;
+        this.correctAnswers = correctAnswers;
+    }
+
+    public Question(String question, String answerA, String answerB, String answerC, String answerD,
                     CorrectAnswer... correctAnswers) {
         this.id = id;
         this.question = question;

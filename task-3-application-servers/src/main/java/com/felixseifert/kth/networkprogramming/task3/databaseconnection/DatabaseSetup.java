@@ -45,6 +45,10 @@ public class DatabaseSetup implements ServletContextListener {
         question = new Question("How many chambers does the heart have?",
                 "1", "2", "4", "6", CorrectAnswer.B);
         questionRepository.create(question);
+
+        question = new Question("Which of the following bases is not found in DNA?",
+                "Adenine", "Cytosine", "Uracil", "Guanine", CorrectAnswer.C);
+        questionRepository.create(question);
     }
 
     @Override
