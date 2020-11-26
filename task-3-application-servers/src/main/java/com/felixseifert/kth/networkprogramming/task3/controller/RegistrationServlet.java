@@ -29,7 +29,7 @@ public class RegistrationServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        userRepository.createUser(new User(null, username, password));
+        userRepository.create(new User(null, username, password));
         response.sendRedirect(ViewPage.LOGIN.fileName);
     }
 }

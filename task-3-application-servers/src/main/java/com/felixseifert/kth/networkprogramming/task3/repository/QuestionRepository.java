@@ -28,7 +28,7 @@ public class QuestionRepository {
         return questionRepositorySingleton;
     }
 
-    public List<Question> findAllQuestions() {
+    public List<Question> findAll() {
 
         List<Question> questions = new ArrayList<>();
 
