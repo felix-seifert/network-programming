@@ -15,6 +15,4 @@ public class ReceiveMailApplication {
         imapClient.logout();
         imapClient.disconnect();
     }
-
-
 }
