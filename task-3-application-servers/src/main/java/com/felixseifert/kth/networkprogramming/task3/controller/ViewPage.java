@@ -3,7 +3,8 @@ package com.felixseifert.kth.networkprogramming.task3.controller;
 public enum ViewPage {
     LOGIN("login.jsp", "/login"),
     QUIZ("quiz.jsp", "/quiz"),
-    REGISTER("registration.jsp", "/register");
+    REGISTER("registration.jsp", "/register"),
+    ADD_QUESTIONS("add-questions.jsp", "/add");
 
     String fileName;
 

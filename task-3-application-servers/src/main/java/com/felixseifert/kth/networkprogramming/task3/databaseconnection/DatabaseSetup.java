@@ -8,12 +8,14 @@ import com.felixseifert.kth.networkprogramming.task3.repository.UserRepository;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@WebListener
 public class DatabaseSetup implements ServletContextListener {
 
     private final UserRepository userRepository = UserRepository.getInstance();
@@ -42,6 +44,10 @@ public class DatabaseSetup implements ServletContextListener {
 
         question = new Question("How many chambers does the heart have?",
                 "1", "2", "4", "6", CorrectAnswer.B);
+        questionRepository.create(question);
+
+        question = new Question("Which of the following bases is not found in DNA?",
+                "Adenine", "Cytosine", "Uracil", "Guanine", CorrectAnswer.C);
         questionRepository.create(question);
     }
 

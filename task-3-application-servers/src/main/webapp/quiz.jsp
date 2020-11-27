@@ -19,7 +19,7 @@
         ArrayList<Question> questions = new ArrayList<>();
         Object data = request.getAttribute("data");
         if(data != null) {
-            questions = (ArrayList<Question>) request.getAttribute("data");
+            questions = (ArrayList<Question>) data;
         }
 
         for (Question question : questions) {
