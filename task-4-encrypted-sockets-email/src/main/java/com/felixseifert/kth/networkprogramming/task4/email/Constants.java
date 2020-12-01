@@ -1,4 +1,4 @@
-package imapClient;
+package com.felixseifert.kth.networkprogramming.task4.email;
 
 public class Constants {
     public static final String USERNAME="";

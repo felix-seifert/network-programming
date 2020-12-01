@@ -1,4 +1,6 @@
-package imapClient;
+package com.felixseifert.kth.networkprogramming.task4.email.imap;
+
+import com.felixseifert.kth.networkprogramming.task4.email.Constants;
 
 import java.io.IOException;
 
