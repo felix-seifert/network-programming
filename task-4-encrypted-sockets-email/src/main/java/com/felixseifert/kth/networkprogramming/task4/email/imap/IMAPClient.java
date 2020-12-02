@@ -1,4 +1,4 @@
-package imapClient;
+package com.felixseifert.kth.networkprogramming.task4.email.imap;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocket;

@@ -1,7 +1,6 @@
-package smtpClient;
+package com.felixseifert.kth.networkprogramming.task4.email.smtp;
 
-
-import imapClient.Constants;
+import com.felixseifert.kth.networkprogramming.task4.email.Constants;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.net.ssl.SSLSocket;
