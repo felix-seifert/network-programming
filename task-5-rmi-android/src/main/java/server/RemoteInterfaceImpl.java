@@ -3,6 +3,8 @@ package server;
 import com.sun.mail.imap.IMAPFolder;
 
 import javax.mail.*;
+import javax.mail.internet.MimeMultipart;
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Properties;
@@ -11,7 +13,7 @@ public class RemoteInterfaceImpl extends UnicastRemoteObject implements RemoteIn
     public RemoteInterfaceImpl()throws RemoteException {
     }
 
-    public void getFirstEmail() {
+    public String getFirstEmail() {
         Session session =this.getImapSession();
         try{
             Store store = session.getStore("imap");
@@ -22,8 +24,11 @@ public class RemoteInterfaceImpl extends UnicastRemoteObject implements RemoteIn
 
             Message[] messages = inbox.getMessages();
             System.out.println(messages[messages.length-1].getContent());
+
+            return getTextFromMessage(messages[messages.length-1]);
         } catch (Exception e){
             System.out.println(e.getMessage());
+            return "";
         }
     }
     private Session getImapSession(){
@@ -36,6 +41,36 @@ public class RemoteInterfaceImpl extends UnicastRemoteObject implements RemoteIn
         Session session = Session.getDefaultInstance(props, null);
         session.setDebug(true);
         return session;
+    }
+
+    private String getTextFromMessage(Message message) throws MessagingException, IOException {
+        String result = "";
+        if (message.isMimeType("text/plain")) {
+            result = message.getContent().toString();
+        } else if (message.isMimeType("multipart/*")) {
+            MimeMultipart mimeMultipart = (MimeMultipart) message.getContent();
+            result = getTextFromMimeMultipart(mimeMultipart);
+        }
+        return result;
+    }
+
+    private String getTextFromMimeMultipart(
+            MimeMultipart mimeMultipart)  throws MessagingException, IOException{
+        String result = "";
+        int count = mimeMultipart.getCount();
+        for (int i = 0; i < count; i++) {
+            BodyPart bodyPart = mimeMultipart.getBodyPart(i);
+            if (bodyPart.isMimeType("text/plain")) {
+                result = result + "\n" + bodyPart.getContent();
+                break;
+            } else if (bodyPart.isMimeType("text/html")) {
+                String html = (String) bodyPart.getContent();
+                result = result + "\n" + org.jsoup.Jsoup.parse(html).text();
+            } else if (bodyPart.getContent() instanceof MimeMultipart){
+                result = result + getTextFromMimeMultipart((MimeMultipart)bodyPart.getContent());
+            }
+        }
+        return result;
     }
 
 }
