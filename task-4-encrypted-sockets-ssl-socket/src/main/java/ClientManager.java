@@ -89,11 +89,9 @@ public class ClientManager implements Runnable {
         String data = receivedContents.substring(receivedContents.lastIndexOf("number=") + "number=".length());
         String responseMessage = "";
 
-
         if (isNumeric(data)) {
             responseMessage = NumberGuessService.guessNumber(Integer.parseInt(data)).label + " <br>";
         }
-
 
         if (Objects.isNull(clientGuessesMap.get(id))) {
             List<String> responsesMessages = new ArrayList<>();

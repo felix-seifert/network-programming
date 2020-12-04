@@ -61,7 +61,6 @@ public class GameServer {
             SSLServerSocketFactory socketFactory = sslContext.getServerSocketFactory();
             sslServerSocket = (SSLServerSocket) socketFactory.createServerSocket(port);
 
-
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
                 | UnrecoverableKeyException | KeyManagementException | NoSuchProviderException | IOException e) {
             e.printStackTrace();
