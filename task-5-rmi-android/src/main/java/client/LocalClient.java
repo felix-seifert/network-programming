@@ -8,7 +8,7 @@ public class LocalClient{
         try {
             RemoteInterface remoteInterface = (RemoteInterface) Naming.lookup("//localhost:1234/myObject");
 
-            remoteInterface.getFirstEmail();
+            System.out.println(remoteInterface.getFirstEmail());
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

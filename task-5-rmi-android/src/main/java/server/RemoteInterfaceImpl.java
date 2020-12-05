@@ -23,8 +23,6 @@ public class RemoteInterfaceImpl extends UnicastRemoteObject implements RemoteIn
             inbox.open(Folder.READ_WRITE);
 
             Message[] messages = inbox.getMessages();
-            System.out.println(messages[messages.length-1].getContent());
-
             return getTextFromMessage(messages[messages.length-1]);
         } catch (Exception e){
             System.out.println(e.getMessage());
