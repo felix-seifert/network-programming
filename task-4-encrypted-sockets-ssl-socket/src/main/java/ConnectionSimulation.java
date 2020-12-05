@@ -1,12 +1,14 @@
 import model.ResponseMessage;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
-import java.io.*;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -14,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -24,7 +27,9 @@ public class ConnectionSimulation {
 
     private static final String certificatePath = "localhost.cer";
 
-    public static void main(String[] args) throws IOException {
+    private static SSLContext sslContext;
+
+    public static void main(String[] args) throws IOException, URISyntaxException {
 
         if(args.length != 2) {
             System.out.println("Two arguments required: <port-number> <number-simulated-rounds>");
@@ -34,20 +39,22 @@ public class ConnectionSimulation {
         }
 
         int port = Integer.parseInt(args[0]);
-        URL  url = new URL("https://localhost:" + port + "/http_post.html");
 
-        setDefaultSSLSocketFactory(certificatePath);
+        URI uri = new URI("https://localhost:" + port + "/http_post.html");
+
+        setSSLContext(certificatePath);
 
         int numberOfRounds = Integer.parseInt(args[1]);
 
         double averageNumberOfTurns = 0.0;
 
         for(int i = 0; i < numberOfRounds; i++) {
-            String clientId = performGetRequestToGetClientId(url);
+
+            String clientId = performGetRequestToGetClientId(uri);
 
             int startingNumber = ThreadLocalRandom.current().nextInt(1, numberOfRounds + 1);
 
-            int numberOfTurns = playRound(url, clientId, startingNumber);
+            int numberOfTurns = playRound(uri, clientId, startingNumber);
             System.out.println("Number of turns needed in " + (i + 1) + ". round: " + numberOfTurns);
 
             averageNumberOfTurns = ((averageNumberOfTurns * i) + numberOfTurns) / (i + 1);
@@ -57,7 +64,8 @@ public class ConnectionSimulation {
         System.out.println("Average number of turns per round: " + averageNumberOfTurns);
     }
 
-    private static int playRound(URL url, String clientId, int number) throws IOException {
+    private static int playRound(URI uri, String clientId, int number)
+            throws IOException {
 
         int turnsToWin = 0;
 
@@ -67,7 +75,7 @@ public class ConnectionSimulation {
         while(true) {
             turnsToWin++;
 
-            String response = performPostRequest(url, clientId, String.valueOf(number));
+            String response = performPostRequest(uri, clientId, String.valueOf(number));
 
             if(response.contains(ResponseMessage.EQUAL.label)) {
                 break;
@@ -97,62 +105,69 @@ public class ConnectionSimulation {
         return turnsToWin;
     }
 
-    private static String performPostRequest(URL url, String clientId, String number) throws IOException {
+    private static String performPostRequest(URI uri, String clientId, String number)
+            throws IOException {
 
-//        HttpRequest httpRequest = HttpRequest.newBuilder()
-//                .uri()
+        HttpClient client = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .sslContext(sslContext)
+                .build();
 
+        String[] headerArray = {
+                "Content-Type", "application/x-www-form-urlencoded",
+                "Accept", "text/html",
+                "User-Agent", USER_AGENT,
+                "Cookie", "clientId=" + clientId};
 
-        String inputString = "number=" + number;
+        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString("number=" + number);
 
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        connection.setRequestProperty("Accept", "text/html");
-        connection.setRequestProperty("User-Agent", USER_AGENT);
-        connection.setRequestProperty("Cookie", "clientId=" + clientId);
-        connection.setDoOutput(true);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .headers(headerArray)
+                .POST(body)
+                .build();
 
-        try(OutputStream outputStream = connection.getOutputStream()) {
-            byte[] input = inputString.getBytes(StandardCharsets.UTF_8);
-            outputStream.write(input);
-            outputStream.flush();
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        //System.out.println(connection.getResponseMessage());
-
-//        try(DataOutputStream dataOutputStream = new DataOutputStream(connection.getOutputStream())) {
-//            String numberString = "number=" + URLEncoder.encode(number, StandardCharsets.UTF_8);
-//            dataOutputStream.writeBytes(numberString);
-//            dataOutputStream.flush();
-//        }
-
-        connection.connect();
-
-        try(BufferedReader reader = new BufferedReader(new InputStreamReader(
-                connection.getInputStream(), StandardCharsets.UTF_8))) {
-            StringBuilder stringBuilder = new StringBuilder();
-            String responseLine;
-            while((responseLine = reader.readLine()) != null) {
-                stringBuilder.append(responseLine.trim());
-            }
-            return stringBuilder.toString();
-        }
+        return Objects.requireNonNull(response).body();
     }
 
-    private static String performGetRequestToGetClientId(URL url) throws IOException {
+    private static String performGetRequestToGetClientId(URI uri) throws IOException {
 
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        connection.setRequestProperty("User-Agent", USER_AGENT);
+        HttpClient client = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .sslContext(sslContext)
+                .build();
 
-        connection.connect();
+        String[] headerArray = {
+                "Accept", "text/html",
+                "User-Agent", USER_AGENT};
 
-        String cookies = connection.getHeaderField("Set-Cookie");
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .headers(headerArray)
+                .GET()
+                .build();
+
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        String cookies = Objects.requireNonNull(response).headers()
+                .firstValue("Set-Cookie").orElseThrow();
 
         return cookies.split("clientId=")[1].split(";")[0];
     }
 
-    private static void setDefaultSSLSocketFactory(String certificatePath) {
+    private static void setSSLContext(String certificatePath) {
         InputStream inputStream = ConnectionSimulation.class.getClassLoader().getResourceAsStream(certificatePath);
 
         try {
@@ -170,8 +185,7 @@ public class ConnectionSimulation {
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
 
-            SSLSocketFactory socketFactory = sslContext.getSocketFactory();
-            HttpsURLConnection.setDefaultSSLSocketFactory(socketFactory);
+            ConnectionSimulation.sslContext = sslContext;
 
         } catch (CertificateException | KeyStoreException | NoSuchAlgorithmException
                 | KeyManagementException | IOException e) {
