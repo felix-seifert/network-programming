@@ -23,11 +23,11 @@ client. This helps the server to identify the past guesses of this client.
 
 For the server side, a keystore with the public and the private key have to be loaded that the server knows how to 
 decrypt the messages which any client encrypted with the public key. The keystore exists in the [resources folder of 
-the application](task-4-encrypted-sockets-ssl-socket/src/main/resources). After loading the keystore as a `KeyManager` 
-with its password (password is `localhost`), an `SSLContext` is needed to eventually create an encrypted server socket 
-(`SSLServerSocket`). An `SSLContext` can be initialised with both a `KeyManager` and a `TrustManager`. However, the 
-server side does not need a `TrustManager` as the classical SSL encryption and the more modern TLS encryption have only 
-a unilateral trust, i.e. only the client trusts the server and the server does not have to trust the clients.
+the application](src/main/resources). After loading the keystore as a `KeyManager` with its password (password is 
+`localhost`), an `SSLContext` is needed to eventually create an encrypted server socket (`SSLServerSocket`). An 
+`SSLContext` can be initialised with both a `KeyManager` and a `TrustManager`. However, the server side does not need a 
+`TrustManager` as the classical SSL encryption and the more modern TLS encryption have only a unilateral trust, i.e. 
+only the client trusts the server and the server does not have to trust the clients.
 
 As the used certificate is self-signed and browsers do not know about this, the certificate has to be imported. For 
 convincing Chrome to accept this certificate (and therefore the website) as secure, an own certification authority (CA) 
@@ -49,11 +49,11 @@ turns per round is printed on the console.
 ## Client Side Connection to SSL Server
 
 To contact an encrypted page, the client needs the certificate which includes the public key of that page. The 
-certificate also exists within the [resources folder of the application](task-4-encrypted-sockets-ssl-socket/src/main/resources). 
-As the certificate is a self-signed certificate which does not exist in Java's trust manager, the goal is to create an 
-own `TrustManager` which includes the needed certificate. The first step is therefore to create a `KeyStore` with the 
-certificate in it which the new `TrustManager` then refers to. With this `TrustManager`, an `SSLContext` is created 
-which can be used to instantiate clients.
+certificate also exists within the [resources folder of the application](src/main/resources). As the certificate is a 
+self-signed certificate which does not exist in Java's trust manager, the goal is to create an own `TrustManager` which 
+includes the needed certificate. The first step is therefore to create a `KeyStore` with the certificate in it which 
+the new `TrustManager` then refers to. With this `TrustManager`, an `SSLContext` is created which can be used to 
+instantiate clients.
 
 Usually, an `HttpClient` can be used to execute multiple requests. However, this somehow does not work and a new 
 `HttpCleint` is needed for every request. Therefore, every time `ConnectionSimulations` fires an `HttpRequest` to the 
