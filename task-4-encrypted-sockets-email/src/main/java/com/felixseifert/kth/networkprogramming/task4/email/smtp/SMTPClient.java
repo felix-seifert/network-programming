@@ -1,6 +1,7 @@
 package com.felixseifert.kth.networkprogramming.task4.email.smtp;
 
 import com.felixseifert.kth.networkprogramming.task4.email.Constants;
+import com.felixseifert.kth.networkprogramming.task4.email.imap.ReceiveMailApplication;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.net.ssl.SSLSocket;
@@ -17,11 +18,17 @@ public class SMTPClient
 
     public static void main(String[] args) throws Exception
     {
-        int delay = 1000;
-        String username = Base64.encodeBase64String(Constants.USERNAME.getBytes(StandardCharsets.UTF_8));
-        String password = Base64.encodeBase64String(Constants.PASSWORD.getBytes(StandardCharsets.UTF_8));
+        if(args.length != 2) {
+            System.out.println("Two argument required: <username>, <password>");
+            System.out.println("Syntax: java " + ReceiveMailApplication.class.getSimpleName() + " <username>, <password>");
+            System.exit(0);
+        }
 
-        SSLSocket sslSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket("smtp.kth.se", 465);
+        int delay = 100;
+        String username = Base64.encodeBase64String(args[0].getBytes(StandardCharsets.UTF_8));
+        String password = Base64.encodeBase64String(args[1].getBytes(StandardCharsets.UTF_8));
+
+        SSLSocket sslSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(Constants.SMTPSERVER, 465);
         DataOutputStream dataOutputStream= new DataOutputStream(sslSocket.getOutputStream());
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(sslSocket.getInputStream()));
         (new Thread(() -> {
@@ -36,7 +43,7 @@ public class SMTPClient
             }
         })).start();
 
-        send(dataOutputStream,"EHLO smtp.gmail.com\r\n");
+        send(dataOutputStream,"EHLO hey\r\n");
         Thread.sleep(delay);
         send(dataOutputStream,"AUTH LOGIN\r\n");
         Thread.sleep(delay);
@@ -52,7 +59,7 @@ public class SMTPClient
         Thread.sleep(delay);
         send(dataOutputStream,"Subject: Email test\r\n");
         Thread.sleep(delay);
-        send(dataOutputStream,"Test 1 2 3\r\n");
+        send(dataOutputStream,"This is totally a dummy email!!!!!!!\r\n");
         Thread.sleep(delay);
         send(dataOutputStream,".\r\n");
         Thread.sleep(delay);

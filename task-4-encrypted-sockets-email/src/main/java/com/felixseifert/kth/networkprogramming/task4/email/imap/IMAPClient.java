@@ -1,5 +1,7 @@
 package com.felixseifert.kth.networkprogramming.task4.email.imap;
 
+import com.felixseifert.kth.networkprogramming.task4.email.Constants;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -9,7 +11,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class IMAPClient {
-    private static final String HOST = "webmail.kth.se";
+    private static final String HOST = Constants.IMAPHOST;
     private static final int PORT = 993;
     private Socket clientSocket = null;
     private BufferedReader in = null;

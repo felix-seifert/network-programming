@@ -1,6 +1,6 @@
 package com.felixseifert.kth.networkprogramming.task4.email;
 
 public class Constants {
-    public static final String USERNAME="";
-    public static final String PASSWORD="";
+    public static final String SMTPSERVER="smtp.kth.se";
+    public static final String IMAPHOST = "webmail.kth.se";
 }
