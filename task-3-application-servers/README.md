@@ -1,7 +1,7 @@
 # Task 3 - Application Servers
 
 In this project we created a simple Java programme which runs on a Tomcat server. The programme builds upon the 
-technologies of Java servlets, displays the frontend in the browser with Java Server Pages (JSP) and uses and H2 
+technologies of Java servlets, displays the frontend in the browser with Java Server Pages (JSP) and uses an H2 
 in-memory database.
 
 The main idea of the application is to present a quiz to the users. The quiz can have several questions and each 
@@ -17,7 +17,7 @@ authorisation). Unauthenticated users are forwarded to the login page under the 
 To achieve this functionality, the login function sets the username as a session attribute after checking that the 
 provided credentials are available in the database. Therefore, it is possible to check whether the user is 
 authenticated via checking for the session attribute. The whole login process and the storage of data in the database 
-is not secure and no communication or storage happens encrypted.
+is not secure and neither communication nor storage happens encrypted.
 
 ## Register Users
 
